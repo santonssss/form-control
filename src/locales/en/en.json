@@ -9,5 +9,10 @@
   "Admin-Panel": "Admin Panel",
   "LightMode": "LightMode",
   "Form-Fill": "Form-Fill",
-  "GoToAuth": "SignIn"
+  "GoToAuth": "SignIn",
+  "SearchForms": "Search teamlates...",
+  "Search": "Search",
+  "Author": "Author",
+  "LookTeamplates": "View template",
+  "LastTeamplates": "Last teamplates"
 }

@@ -9,5 +9,10 @@
   "Admin-Panel": "Админ панель",
   "LightMode": "Светлый режим",
   "Form-Fill": "Заполнение формы",
-  "GoToAuth": "Войти"
+  "GoToAuth": "Войти",
+  "SearchForms": "Поиск шаблонов...",
+  "Search": "Поиск",
+  "Author": "Автор",
+  "LookTeamplates": "Посмотреть шаблон",
+  "LastTeamplates": "Последние шаблоны"
 }
