@@ -19,5 +19,20 @@
   "TagsCloud": "Облако тегов",
   "FooterCopy": "Авторское право",
   "FooterRights": "Все права защищены",
-  "FooterContact": "Свяжитесь со мной"
+  "FooterContact": "Свяжитесь со мной",
+  "TemplateSettings": "Настройки шаблона",
+  "Title": "Название",
+  "Description": "Описание",
+  "Private": "Приватный",
+  "Public": "Публичный",
+  "Questions": "Вопросы",
+  "SaveChanges": "Сохранить изменения",
+  "NewQuestion": "Новый вопрос",
+  "text": "Текст",
+  "textarea": "Текстовое поле",
+  "number": "Число",
+  "checkbox": "Флажок",
+  "radio": "Переключатель",
+  "NoDescription": "Описание отсутствует",
+  "MaximumQuestionsReached": "Вы можете добавить не более 4 вопросов данного типа."
 }

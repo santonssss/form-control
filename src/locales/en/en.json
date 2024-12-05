@@ -19,5 +19,20 @@
   "TagsCloud": "Tags Cloud",
   "FooterCopy": "Copyright",
   "FooterRights": "All rights reserved",
-  "FooterContact": "Contact me"
+  "FooterContact": "Contact me",
+  "TemplateSettings": "Template Settings",
+  "Title": "Title",
+  "Description": "Description",
+  "Private": "Private",
+  "Public": "Public",
+  "Questions": "Questions",
+  "SaveChanges": "Save Changes",
+  "NewQuestion": "New Question",
+  "text": "Text",
+  "textarea": "Textarea",
+  "number": "Number",
+  "checkbox": "Checkbox",
+  "radio": "Radio",
+  "NoDescription": "No description available",
+  "MaximumQuestionsReached": "You can add up to 4 questions of this type."
 }

@@ -43,7 +43,7 @@ const Header = (props: Props) => {
             {(t as any)("Home")}
           </Link>
           <Link
-            to="/create"
+            to="/create-form"
             className="hover:text-gray-300 text-black dark:text-white"
           >
             {(t as any)("Create-Form")}
