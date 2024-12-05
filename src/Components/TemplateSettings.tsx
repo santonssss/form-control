@@ -13,8 +13,8 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { useTranslation } from "react-i18next";
-import { SortableItem } from "./SortableItem";
 import { Question } from "../types/types";
+import QuestionComponent from "./Question";
 
 type Props = {
   onSave: (data: {
@@ -46,29 +46,40 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (over && active.id !== over.id) {
       const activeIndex = questions.findIndex((q) => q.id === active.id);
       const overIndex = questions.findIndex((q) => q.id === over.id);
-      setQuestions((prev) => arrayMove(prev, activeIndex, overIndex));
+
+      setQuestions((questions) => arrayMove(questions, activeIndex, overIndex));
     }
   };
 
   const handleAddQuestion = (type: Question["type"]) => {
+    if (questions.filter((q) => q.type === type).length >= 4) {
+      alert((t as any)("MaximumQuestionsReached"));
+      return;
+    }
+
     const newQuestion: Question = {
       id: Date.now().toString(),
       type,
-      title: (t as any)("NewQuestion"),
+      title: (t as any)(""),
       description: "",
-      options:
-        type === "checkbox" || type === "radio"
-          ? [{ value: "", checked: false }]
-          : [],
+      options: [],
     };
-    setQuestions((prev) => [...prev, newQuestion]);
+    setQuestions([...questions, newQuestion]);
+  };
+
+  const handleQuestionUpdate = (updatedQuestion: Question) => {
+    setQuestions(
+      questions.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
+    );
   };
 
   const handleSave = () => {
@@ -76,71 +87,70 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
+    <div className="space-y-6">
       <h2 className="text-xl font-bold dark:text-white">
         {(t as any)("TemplateSettings")}
       </h2>
-
-      <div className="mt-4 space-y-4">
-        <input
-          type="text"
-          placeholder={(t as any)("Title")}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="block w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-        />
-        <textarea
-          placeholder={(t as any)("Description")}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="block w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-        ></textarea>
-      </div>
-
+      <input
+        type="text"
+        placeholder={(t as any)("Title")}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="block w-full mt-2 p-2 border rounded dark:bg-gray-800 dark:text-white"
+      />
+      <textarea
+        placeholder={(t as any)("Description")}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        className="block w-full mt-2 p-2 border rounded dark:bg-gray-800 dark:text-white"
+      ></textarea>
       <select
         value={accessType}
         onChange={(e) => setAccessType(e.target.value)}
-        className="mt-4 p-2 border rounded w-full dark:bg-gray-700 dark:text-white"
+        className="block w-full mt-2 p-2 border rounded dark:bg-gray-800 dark:text-white"
       >
         <option value="private">{(t as any)("Private")}</option>
         <option value="public">{(t as any)("Public")}</option>
       </select>
 
-      <div className="mt-6">
-        <h3 className="text-lg font-bold dark:text-white">
-          {(t as any)("Questions")}
-        </h3>
+      {/* DnD для управления вопросами */}
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <SortableContext items={questions.map((q) => q.id)}>
+          <div>
+            <h3 className="text-lg font-bold dark:text-white">
+              {(t as any)("Questions")}
+            </h3>
+            <div className="flex space-x-2">
+              {["text", "textarea", "number", "checkbox", "radio"].map(
+                (type) => (
+                  <button
+                    key={type}
+                    onClick={() => handleAddQuestion(type as Question["type"])}
+                    className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    {(t as any)(type)}
+                  </button>
+                )
+              )}
+            </div>
 
-        <div className="flex space-x-2 my-4">
-          {["text", "textarea", "number", "checkbox", "radio"].map((type) => (
-            <button
-              key={type}
-              onClick={() => handleAddQuestion(type as Question["type"])}
-              className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              {(t as any)(type)}
-            </button>
-          ))}
-        </div>
-
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          <SortableContext items={questions.map((q) => q.id)}>
-            <ul className="space-y-2">
+            <div className="space-y-2 mt-4">
               {questions.map((question) => (
-                <SortableItem key={question.id} id={question.id}>
-                  <div className="p-4 border rounded bg-white dark:bg-gray-700 dark:text-white">
-                    <strong>{question.title}</strong>
-                    <p>{question.description || (t as any)("NoDescription")}</p>
-                  </div>
-                </SortableItem>
+                <QuestionComponent
+                  key={question.id}
+                  question={question}
+                  onUpdate={handleQuestionUpdate}
+                  t={t}
+                />
               ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
-      </div>
+            </div>
+          </div>
+        </SortableContext>
+      </DndContext>
+
       <button
         onClick={handleSave}
-        className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
       >
         {(t as any)("SaveChanges")}
       </button>

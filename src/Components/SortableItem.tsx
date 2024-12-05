@@ -1,4 +1,4 @@
-import React, { useMemo, useContext } from "react";
+import React, { useMemo, useContext, useEffect } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -32,13 +32,19 @@ export const SortableItem = ({
   return (
     <SortableItemContext.Provider value={{ attributes, listeners }}>
       <li
-        ref={setNodeRef}
-        {...listeners}
-        {...attributes}
         style={style}
         className="sortable-item p-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
       >
-        {children}
+        {children}{" "}
+        <button
+          className="DragHandle  w-full h-10 dark:bg-gray-600 bg-green-200"
+          {...attributes}
+          {...listeners}
+          ref={setNodeRef}
+        >
+          {" "}
+          Удерживаете эту област чтоб перетаскивать элементы!
+        </button>
       </li>
     </SortableItemContext.Provider>
   );

@@ -34,5 +34,10 @@
   "checkbox": "Checkbox",
   "radio": "Radio",
   "NoDescription": "No description available",
-  "MaximumQuestionsReached": "You can add up to 4 questions of this type."
+  "MaximumQuestionsReached": "You can add up to 4 questions of this type.",
+  "QuestionTitle": "Enter question title",
+  "QuestionDescription": "Enter question description",
+  "OptionPlaceholder": "Enter option text",
+  "AddOption": "Add answer",
+  "Delete": "Delete"
 }

@@ -34,5 +34,10 @@
   "checkbox": "Флажок",
   "radio": "Переключатель",
   "NoDescription": "Описание отсутствует",
-  "MaximumQuestionsReached": "Вы можете добавить не более 4 вопросов данного типа."
+  "MaximumQuestionsReached": "Вы можете добавить не более 4 вопросов данного типа.",
+  "QuestionTitle": "Введите заголовок вопроса",
+  "QuestionDescription": "Введите описание вопроса",
+  "OptionPlaceholder": "Введите текст варианта",
+  "AddOption": "Добавить ответ",
+  "Delete": "Удалить"
 }
