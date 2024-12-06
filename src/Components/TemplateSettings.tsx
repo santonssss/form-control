@@ -119,7 +119,7 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
             <h3 className="text-lg font-bold dark:text-white">
               {(t as any)("Questions")}
             </h3>
-            <div className="flex space-x-2 overflow-y-auto overflow-hidden">
+            <div className="flex space-x-2 overflow-hidden overflow-x-scroll ">
               {["text", "textarea", "number", "checkbox", "radio"].map(
                 (type) => (
                   <button
