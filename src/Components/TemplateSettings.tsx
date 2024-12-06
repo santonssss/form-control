@@ -85,7 +85,6 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
   const handleSave = () => {
     onSave({ title, description, accessType, questions });
   };
-
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold dark:text-white">
@@ -120,7 +119,7 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
             <h3 className="text-lg font-bold dark:text-white">
               {(t as any)("Questions")}
             </h3>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 overflow-y-auto overflow-hidden">
               {["text", "textarea", "number", "checkbox", "radio"].map(
                 (type) => (
                   <button

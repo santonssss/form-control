@@ -6,7 +6,6 @@
   margin: 0;
   box-sizing: border-box;
 }
-/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -20,7 +19,6 @@
   z-index: 1000;
 }
 
-/* Modal Content */
 .modal-content {
   background-color: white;
   padding: 20px;

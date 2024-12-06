@@ -37,7 +37,7 @@ export const SortableItem = ({
       >
         {children}{" "}
         <button
-          className="DragHandle  w-full h-10 dark:bg-gray-600 bg-green-200"
+          className="DragHandle  w-full h-10 dark:bg-gray-600 dark:text-white bg-green-200"
           {...attributes}
           {...listeners}
           ref={setNodeRef}

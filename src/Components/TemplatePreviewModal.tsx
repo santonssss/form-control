@@ -39,7 +39,6 @@ const TemplatePreviewModal: React.FC<Props> = ({
           Ваш шаблон теперь выглядит так:
         </h2>
 
-        {/* Заголовок шаблона */}
         <div className="mb-4">
           <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
             {templateData.title}
@@ -49,7 +48,6 @@ const TemplatePreviewModal: React.FC<Props> = ({
           </p>
         </div>
 
-        {/* Вопросы и ответы */}
         <ul className="space-y-4">
           {templateData.questions.map((question) => (
             <li
@@ -63,24 +61,32 @@ const TemplatePreviewModal: React.FC<Props> = ({
                 {question.description}
               </p>
 
-              {/* Опции для checkbox или radio */}
-              {question.options && (
-                <ul className="mt-2 pl-4">
-                  {question.options.map((option) => (
-                    <li
-                      key={option.id}
-                      className="text-gray-600 dark:text-gray-300"
-                    >
-                      {option.value}
+              {question.type === "checkbox" || question.type === "radio" ? (
+                <ul className="mt-2 space-y-2">
+                  {question.options?.map((option) => (
+                    <li key={option.id} className="flex items-center space-x-2">
+                      <input
+                        type={question.type}
+                        name={question.id}
+                        id={option.id}
+                        value={option.value}
+                        defaultChecked={option.checked}
+                        disabled
+                        className="cursor-not-allowed"
+                      />
+                      <label
+                        htmlFor={option.id}
+                        className="text-gray-600 dark:text-gray-300"
+                      >
+                        {option.value}
+                      </label>
                     </li>
                   ))}
                 </ul>
-              )}
+              ) : null}
             </li>
           ))}
         </ul>
-
-        {/* Кнопка закрытия модалки */}
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
