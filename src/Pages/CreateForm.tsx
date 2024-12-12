@@ -18,6 +18,8 @@ const CreateForm = (props: Props) => {
   }) => {
     console.log("Сохранённые настройки шаблона:", settings);
     setTemplateData(settings);
+    console.log(settings);
+
     setShowModal(true);
   };
 

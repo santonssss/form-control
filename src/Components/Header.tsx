@@ -49,7 +49,7 @@ const Header = (props: Props) => {
             {(t as any)("Create-Form")}
           </Link>
           <Link
-            to="/admin"
+            to="/admin/users"
             className="hover:text-gray-300 text-black dark:text-white"
           >
             {(t as any)("Admin-Panel")}
@@ -88,14 +88,14 @@ const Header = (props: Props) => {
               {(t as any)("Home")}
             </Link>
             <Link
-              to="/create"
+              to="/create-form"
               className="hover:text-gray-300 text-black dark:text-white"
               onClick={() => setMenuOpen(false)}
             >
               {(t as any)("Create-Form")}
             </Link>
             <Link
-              to="/admin"
+              to="/admin/users"
               className="hover:text-gray-300 text-black dark:text-white"
               onClick={() => setMenuOpen(false)}
             >

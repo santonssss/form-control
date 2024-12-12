@@ -112,7 +112,6 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
         <option value="public">{(t as any)("Public")}</option>
       </select>
 
-      {/* DnD для управления вопросами */}
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <SortableContext items={questions.map((q) => q.id)}>
           <div>
