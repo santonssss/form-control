@@ -16,10 +16,9 @@ const CreateForm = (props: Props) => {
     accessType: string;
     questions: any[];
   }) => {
-    console.log("Сохранённые настройки шаблона:", settings);
+    console.log(settings);
     setTemplateData(settings);
     console.log(settings);
-
     setShowModal(true);
   };
 
@@ -28,7 +27,7 @@ const CreateForm = (props: Props) => {
   };
 
   return (
-    <div className="dark:bg-gray-700 ">
+    <div className="dark:bg-gray-700 min-h-[100vh] ">
       <Header />
       <div className="max-w-screen-xl mr-auto ml-auto w-[95%]">
         <TemplateSettings onSave={handleSaveSettings} />

@@ -64,5 +64,11 @@
   "QuestionType": "Question Type",
   "Options": "Options",
   "AccessType": "Access type",
-  "Question": "Question"
+  "Question": "Question",
+  "formFillPagetitle": "Explore Templates",
+  "like": "Like",
+  "FormFillPage": "Form Fill Page",
+  "Comments": "Comments",
+  "AddCommentPlaceholder": "Add a comment...",
+  "Submit": "Submit"
 }

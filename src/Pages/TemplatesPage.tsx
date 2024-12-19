@@ -170,13 +170,22 @@ const TemplatesPage: React.FC = () => {
           >
             <h3 className="text-lg font-semibold">{template.title}</h3>
             <p>
-              {(t as any)("Description")}: <span>{template.description}</span>
+              {(t as any)("Description")}:{" "}
+              <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                {template.description}
+              </span>
             </p>
             <p>
-              {(t as any)("Author")}: <span>{template.author}</span>
+              {(t as any)("Author")}:{" "}
+              <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                {template.author}
+              </span>
             </p>
             <p>
-              {(t as any)("AccessType")}: <span>{template.accessType}</span>
+              {(t as any)("AccessType")}:{" "}
+              <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                {template.accessType}
+              </span>
             </p>
             <button
               onClick={() => handleEditClick(template)}

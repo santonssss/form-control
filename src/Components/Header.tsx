@@ -14,27 +14,22 @@ const Header = (props: Props) => {
   return (
     <header className="bg-white text-white p-4 dark:bg-gray-800 dark:text-white">
       <div className="max-w-screen-xl mx-auto flex justify-between items-center">
-        {/* Логотип */}
         <div className="text-xl font-bold text-black dark:text-white">
           <Link to="/" className="hover:text-gray-300">
             Form-Control
           </Link>
         </div>
 
-        {/* Чекбокс/меню для мобильных */}
         <div className="md:hidden flex items-center gap-5">
-          {/* Кнопка для управления меню */}
           <button
             className="text-black dark:text-white focus:outline-none"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             <span className="text-xl">&#9776;</span>
           </button>
-          {/* Кнопка "Войти" */}
           <GoToAuthBtn />
         </div>
 
-        {/* Навигация для десктопа */}
         <nav className="hidden md:flex space-x-4">
           <Link
             to="/"
@@ -54,12 +49,7 @@ const Header = (props: Props) => {
           >
             {(t as any)("Admin-Panel")}
           </Link>
-          <Link
-            to="/profile"
-            className="hover:text-gray-300 text-black dark:text-white"
-          >
-            {(t as any)("Profile")}
-          </Link>
+
           <Link
             to="/formFill"
             className="hover:text-gray-300 text-black dark:text-white"
@@ -68,7 +58,6 @@ const Header = (props: Props) => {
           </Link>
         </nav>
 
-        {/* Переключатели для десктопа */}
         <div className="hidden md:flex items-center justify-center space-x-4">
           <ToggleTheme />
           <ToggleLanguage />
@@ -76,7 +65,6 @@ const Header = (props: Props) => {
         </div>
       </div>
 
-      {/* Мобильное меню */}
       {menuOpen && (
         <div className="md:hidden bg-gray-100 dark:bg-gray-700 text-black dark:text-white">
           <nav className="flex flex-col space-y-2 p-4">
@@ -102,13 +90,6 @@ const Header = (props: Props) => {
               {(t as any)("Admin-Panel")}
             </Link>
             <Link
-              to="/profile"
-              className="hover:text-gray-300 text-black dark:text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              {(t as any)("Profile")}
-            </Link>
-            <Link
               to="/formFill"
               className="hover:text-gray-300 text-black dark:text-white"
               onClick={() => setMenuOpen(false)}
@@ -117,7 +98,6 @@ const Header = (props: Props) => {
             </Link>
           </nav>
 
-          {/* Переключатели внутри мобильного меню */}
           <div className="flex flex-col space-y-2 p-4 border-t border-gray-300 dark:border-gray-600">
             <ToggleTheme />
             <ToggleLanguage />

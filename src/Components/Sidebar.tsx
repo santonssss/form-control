@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 import ToggleTheme from "./ToggleTheme";
 import ToggleLanguage from "./ToggleLanguage";
+import { Link } from "react-router-dom";
 
 const Sidebar: React.FC = () => {
   const { t } = useTranslation();
@@ -33,10 +34,16 @@ const Sidebar: React.FC = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-4 border-b dark:border-gray-700">
-          <h1 className="text-lg font-semibold dark:text-white">
+        <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
+          <h1 className="text-lg font-semibold dark:text-white ">
             {(t as any)("AdminPanel")}
           </h1>
+          <Link
+            to={"/"}
+            className="dark:text-white text-dark-500 dark:bg-blue-500 py-1 px-1 rounded-lg"
+          >
+            Назад
+          </Link>
         </div>
         <nav className="flex-1">
           <ul className="space-y-2 p-4">
