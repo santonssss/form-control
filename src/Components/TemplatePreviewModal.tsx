@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { saveTemplateToSupabase } from "../func/uploadFunc";
+import { useTranslation } from "react-i18next";
+import LoadingSpinner from "./LoadingSpinner";
 
 type Option = {
   id: string;
@@ -31,14 +33,27 @@ const TemplatePreviewModal: React.FC<Props> = ({
   templateData,
   onClose,
 }) => {
+  const { t } = useTranslation();
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   if (!showModal) return null;
   const author = localStorage.getItem("fullName");
   const email = localStorage.getItem("email");
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    try {
+      await saveTemplateToSupabase(templateData, author, email, t);
+      onClose();
+    } catch (error) {
+      console.error("Error saving template:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg w-3/4 md:w-1/2 p-6 shadow-xl">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-          Ваш шаблон теперь выглядит так:
+          {(t as any)("Your template now looks like this")}:
         </h2>
 
         <div className="mb-4">
@@ -90,15 +105,18 @@ const TemplatePreviewModal: React.FC<Props> = ({
           ))}
         </ul>
         <div className="mt-6 flex justify-end">
-          <button
-            onClick={async () => {
-              await saveTemplateToSupabase(templateData, author, email);
-              onClose();
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300"
-          >
-            Закрыть
-          </button>
+          {isSubmitting ? (
+            <div className="flex items-center">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <button
+              onClick={handleSave}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300"
+            >
+              {(t as any)("save")}
+            </button>
+          )}
         </div>
       </div>
     </div>

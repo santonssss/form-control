@@ -79,5 +79,9 @@
   "FormFillPage": "Страница заполнения",
   "Comments": "Комментарии",
   "AddCommentPlaceholder": "Добавьте комментарий...",
-  "Submit": "Отправить"
+  "Submit": "Отправить",
+  "Data saved successfully": "Данные успешно сохранены✔️",
+  "Failed to save data": "Не удалось сохранить данные❌",
+  "save": "Сохранить",
+  "Your template now looks like this": "Ваш шаблон теперь выглядит так"
 }

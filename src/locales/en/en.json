@@ -70,5 +70,9 @@
   "FormFillPage": "Form Fill Page",
   "Comments": "Comments",
   "AddCommentPlaceholder": "Add a comment...",
-  "Submit": "Submit"
+  "Submit": "Submit",
+  "Data saved successfully": "Data saved successfully✔️",
+  "Failed to save data": "Failed to save data❌",
+  "save": "save",
+  "Your template now looks like this": "Your template now looks like this"
 }

@@ -1,4 +1,6 @@
-import { supabase } from "../supabaseClient"; // Ваш клиент Supabase
+import toast from "react-hot-toast";
+import { supabase } from "../supabaseClient";
+import { useTranslation } from "react-i18next";
 
 type Option = {
   id: string;
@@ -24,10 +26,10 @@ type TemplateData = {
 export const saveTemplateToSupabase = async (
   templateData: TemplateData,
   author: any,
-  gmail: any
+  gmail: any,
+  t: any
 ) => {
   try {
-    // 1. Вставляем шаблон в таблицу templates
     const { data: template, error: templateError } = await supabase
       .from("templates")
       .insert([
@@ -39,7 +41,7 @@ export const saveTemplateToSupabase = async (
           gmail: gmail,
         },
       ])
-      .select(); // Используем select(), чтобы вернуть созданный шаблон с id
+      .select();
 
     if (templateError) {
       throw new Error(
@@ -49,7 +51,6 @@ export const saveTemplateToSupabase = async (
 
     const templateId = template[0].id;
 
-    // 2. Вставляем вопросы в таблицу questions
     for (const question of templateData.questions) {
       const { data: questionData, error: questionError } = await supabase
         .from("questions")
@@ -61,7 +62,7 @@ export const saveTemplateToSupabase = async (
             type: question.type,
           },
         ])
-        .select(); // Получаем id созданного вопроса
+        .select();
 
       if (questionError) {
         throw new Error(
@@ -71,7 +72,6 @@ export const saveTemplateToSupabase = async (
 
       const questionId = questionData[0].id;
 
-      // 3. Вставляем опции (если есть) в таблицу options
       if (question.options && question.options.length > 0) {
         const options = question.options.map((option) => ({
           question_id: questionId,
@@ -90,12 +90,10 @@ export const saveTemplateToSupabase = async (
         }
       }
     }
-
-    console.log("Шаблон успешно сохранён!");
-
+    toast((t as any)("Data saved successfully"));
     return { success: true };
   } catch (error) {
-    console.error("Ошибка при сохранении шаблона:", error);
+    toast((t as any)("Failed to save data"));
     return { success: false, error: error };
   }
 };
