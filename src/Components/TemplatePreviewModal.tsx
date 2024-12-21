@@ -1,4 +1,5 @@
 import React from "react";
+import { saveTemplateToSupabase } from "../func/uploadFunc";
 
 type Option = {
   id: string;
@@ -31,7 +32,8 @@ const TemplatePreviewModal: React.FC<Props> = ({
   onClose,
 }) => {
   if (!showModal) return null;
-
+  const author = localStorage.getItem("fullName");
+  const email = localStorage.getItem("email");
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg w-3/4 md:w-1/2 p-6 shadow-xl">
@@ -89,7 +91,10 @@ const TemplatePreviewModal: React.FC<Props> = ({
         </ul>
         <div className="mt-6 flex justify-end">
           <button
-            onClick={onClose}
+            onClick={async () => {
+              await saveTemplateToSupabase(templateData, author, email);
+              onClose();
+            }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300"
           >
             Закрыть

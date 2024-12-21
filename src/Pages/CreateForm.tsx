@@ -1,4 +1,3 @@
-// CreateForm.tsx
 import React, { useState } from "react";
 import Header from "../Components/Header";
 import TemplateSettings from "../Components/TemplateSettings";
@@ -16,7 +15,6 @@ const CreateForm = (props: Props) => {
     accessType: string;
     questions: any[];
   }) => {
-    console.log(settings);
     setTemplateData(settings);
     console.log(settings);
     setShowModal(true);
