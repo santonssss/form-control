@@ -6,9 +6,10 @@ import AdminLayout from "./Pages/AdminLayout";
 import UsersPage from "./Pages/UsersPage";
 import TemplatesPage from "./Pages/TemplatesPage";
 import FormsPage from "./Pages/FormsPage";
-import { FormFill } from "./Pages/FormFillPage";
+import FormFill from "./Pages/FormFillPage";
 import LoginForm from "./Pages/LoginPage";
 import SignUpForm from "./Pages/SingUp";
+import ViewToTeamplate from "./Pages/ViewToTeamplate";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/formFill" element={<FormFill />} />
       <Route path="/login" element={<LoginForm />} />
       <Route path="/sign-up" element={<SignUpForm />} />
+      <Route path="/teamplate/:id" element={<ViewToTeamplate />} />
     </Routes>
   );
 }

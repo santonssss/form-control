@@ -18,6 +18,7 @@ const LoginForm: React.FC = () => {
       if (data && data.user && data.user.email) {
         localStorage.setItem("email", data.user?.user_metadata.email);
         localStorage.setItem("fullName", data.user?.user_metadata.first_name);
+        console.log(data);
       }
       if (data.session?.access_token) {
         localStorage.setItem("accessToken", data.session.access_token);

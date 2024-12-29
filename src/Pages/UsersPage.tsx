@@ -68,7 +68,6 @@ const UsersPage: React.FC = () => {
         className="w-full mb-4 p-2 border border-gray-300 rounded dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
       />
 
-      {/* Для больших экранов показываем таблицу */}
       <div className="hidden md:block">
         <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
           <thead className="bg-gray-200 dark:bg-gray-700">
@@ -138,7 +137,6 @@ const UsersPage: React.FC = () => {
         </table>
       </div>
 
-      {/* Для мобильных экранов показываем карточки */}
       <div className="md:hidden">
         {filteredUsers.map((user) => (
           <div

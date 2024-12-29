@@ -16,7 +16,6 @@ const CreateForm = (props: Props) => {
     questions: any[];
   }) => {
     setTemplateData(settings);
-    console.log(settings);
     setShowModal(true);
   };
 

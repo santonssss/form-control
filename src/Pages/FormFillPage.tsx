@@ -1,228 +1,213 @@
-import React, { useState } from "react";
-import Header from "../Components/Header";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  fetchTemplates,
+  fetchComments,
+  postComment,
+  incrementViews,
+  hasUserLiked,
+  addLike,
+  removeLike,
+} from "../func/uploadFunc";
 import Footer from "../Components/Footer";
+import Header from "../Components/Header";
+import CommentSection from "../Components/CommentSection";
+import LoadingSpinner from "../Components/LoadingSpinner";
 
 interface Template {
   id: string;
-  accessType: string;
-  description: string;
-  author: string;
-  gmail: string;
   title: string;
-  questions: {
-    id: string;
-    type: string;
-    title: string;
-    description: string;
-    options: { id: string; value: string; checked: boolean }[];
-  }[];
+  description: string;
 }
 
-interface Responses {
-  [templateId: string]: {
-    [questionId: string]: string | string[];
-  };
+interface Comment {
+  id: string;
+  content: string;
+  author: string;
+  created_at: string;
 }
 
-export const FormFill: React.FC = () => {
-  const [templates, setTemplates] = useState<Template[]>([
-    {
-      id: "1",
-      accessType: "private",
-      description: "how long your experience?",
-      author: "Sarvar",
-      gmail: "sarvarkalmuratov370@gmail.com",
-      title: "title",
-      questions: [
-        {
-          id: "1733820461638",
-          type: "text",
-          title: "How you long?",
-          description: "Расскажите подробно",
-          options: [],
-        },
-        {
-          id: "1733820491706",
-          type: "checkbox",
-          title: "Какие фрукты вы любите?",
-          description: "Выделите все",
-          options: [
-            { id: "1733820514718", value: "Апельсин", checked: false },
-            { id: "1733820510062", value: "Банан", checked: false },
-          ],
-        },
-        {
-          id: "1733820491707",
-          type: "radio",
-          title: "Выберите свой любимый цвет",
-          description: "Выберите один из вариантов",
-          options: [
-            { id: "1733820514720", value: "Красный", checked: false },
-            { id: "1733820510063", value: "Синий", checked: false },
-            { id: "1733820510064", value: "Зеленый", checked: false },
-          ],
-        },
-      ],
-    },
-  ]);
+const FormFillPage = () => {
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState<string>("");
 
-  const [responses, setResponses] = useState<Responses>({
-    "1": {
-      "1733820461638": "",
-      "1733820491706": [],
-      "1733820491707": "",
-    },
-  });
+  const [currentTemplate, setCurrentTemplate] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
-  const handleInputChange = (
-    templateId: string,
-    questionId: string,
-    value: string
-  ) => {
-    setResponses((prev: Responses) => ({
-      ...prev,
-      [templateId]: {
-        ...prev[templateId],
-        [questionId]: value,
-      },
-    }));
-  };
+  const limit = 10;
+  const [likedTemplates, setLikedTemplates] = useState<Map<string, boolean>>(
+    new Map()
+  ); // хранение статуса лайков
 
-  const handleCheckboxChange = (
-    templateId: string,
-    questionId: string,
-    value: string
-  ) => {
-    setResponses((prev: Responses) => {
-      const updatedResponses = prev[templateId]?.[questionId] || [];
+  const loadTemplates = async () => {
+    setLoading(true);
 
-      if (Array.isArray(updatedResponses)) {
-        if (updatedResponses.includes(value)) {
-          updatedResponses.splice(updatedResponses.indexOf(value), 1);
-        } else {
-          updatedResponses.push(value);
-        }
-      } else {
-        let updatedResponses = [value];
+    const start = page * limit;
+    const end = start + limit;
+
+    try {
+      const data = await fetchTemplates(start, limit);
+      if (data.length < limit) {
+        setHasMore(false);
       }
 
-      return {
-        ...prev,
-        [templateId]: {
-          ...prev[templateId],
-          [questionId]: updatedResponses,
-        },
-      };
-    });
+      setTemplates((prev) => {
+        const prevIds = prev.map((template) => template.id);
+        const uniqueData = data.filter(
+          (template) => !prevIds.includes(template.id)
+        );
+
+        return [...prev, ...shuffleArray(uniqueData)];
+      });
+
+      setPage((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRadioChange = (
-    templateId: string,
-    questionId: string,
-    value: string
-  ) => {
-    setResponses((prev: Responses) => ({
-      ...prev,
-      [templateId]: {
-        ...prev[templateId],
-        [questionId]: value,
-      },
-    }));
+  const shuffleArray = (array: Template[]): Template[] => {
+    return array.sort(() => Math.random() - 0.5);
+  };
+
+  const loadComments = async (templateId: string) => {
+    if (currentTemplate === templateId) {
+      setComments([]);
+      setCurrentTemplate(null);
+    } else {
+      setLoading(true);
+      const data = await fetchComments(templateId);
+      setComments(data);
+      setCurrentTemplate(templateId);
+      setLoading(false);
+    }
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newComment.trim() === "") return;
+
+    if (currentTemplate) {
+      await postComment(currentTemplate, newComment);
+      await loadComments(currentTemplate);
+      setNewComment("");
+    }
+  };
+
+  const handleLikeClick = async (templateId: string) => {
+    const email = localStorage.getItem("email");
+
+    if (!email) return; // Если нет email, ничего не делаем
+
+    const isLiked = likedTemplates.get(templateId);
+
+    if (isLiked) {
+      await removeLike(templateId, email);
+      setLikedTemplates((prev) => new Map(prev).set(templateId, false)); // Обновляем состояние
+    } else {
+      await addLike(templateId, email);
+      setLikedTemplates((prev) => new Map(prev).set(templateId, true)); // Обновляем состояние
+    }
+  };
+
+  useEffect(() => {
+    loadTemplates();
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const checkLikes = async () => {
+      const email = localStorage.getItem("email");
+
+      if (email) {
+        const templateLikes: Map<string, boolean> = new Map();
+        for (const template of templates) {
+          const liked = await hasUserLiked(template.id, email);
+          templateLikes.set(template.id, liked);
+        }
+        setLikedTemplates(templateLikes);
+      }
+    };
+
+    checkLikes();
+  }, [templates]);
+
+  const handleScroll = () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (scrollTop + clientHeight >= scrollHeight - 5 && !loading && hasMore) {
+      loadTemplates();
+    }
   };
 
   return (
-    <div className="dark:bg-gray-700">
-      <Header />
-      <div className="max-w-screen-lg mx-auto p-6 space-y-6">
-        {templates.map((template) => (
-          <div
-            key={template.id}
-            className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-md"
-          >
-            <h2 className="text-xl font-semibold">{template.title}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Автор: {template.author} ({template.gmail})
-            </p>
-            <p className="mt-2">{template.description}</p>
-
-            <div className="mt-4">
-              {template.questions.map((question) => (
-                <div key={question.id} className="mb-4">
-                  <h3 className="font-medium">{question.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {question.description}
-                  </p>
-
-                  {question.type === "text" && (
-                    <input
-                      type="text"
-                      className="mt-2 p-2 border rounded w-full"
-                      placeholder="Ваш ответ"
-                      value={responses[template.id]?.[question.id] || ""}
-                      onChange={(e) =>
-                        handleInputChange(
-                          template.id,
-                          question.id,
-                          e.target.value
-                        )
-                      }
-                    />
-                  )}
-
-                  {question.type === "checkbox" &&
-                    question.options.map((option) => (
-                      <div key={option.id} className="flex items-center mt-2">
-                        <input
-                          type="checkbox"
-                          id={option.id}
-                          checked={responses[template.id]?.[
-                            question.id
-                          ]?.includes(option.value)}
-                          onChange={() =>
-                            handleCheckboxChange(
-                              template.id,
-                              question.id,
-                              option.value
-                            )
-                          }
-                          className="mr-2"
-                        />
-                        <label htmlFor={option.id}>{option.value}</label>
-                      </div>
-                    ))}
-
-                  {question.type === "radio" &&
-                    question.options.map((option) => (
-                      <div key={option.id} className="flex items-center mt-2">
-                        <input
-                          type="radio"
-                          id={option.id}
-                          name={question.id}
-                          checked={
-                            responses[template.id]?.[question.id] ===
-                            option.value
-                          }
-                          onChange={() =>
-                            handleRadioChange(
-                              template.id,
-                              question.id,
-                              option.value
-                            )
-                          }
-                          className="mr-2"
-                        />
-                        <label htmlFor={option.id}>{option.value}</label>
-                      </div>
-                    ))}
+    <>
+      <div className="dark:bg-gray-700 min-h-[100vh]">
+        <Header />
+        <div className="max-w-screen-lg mx-auto p-6 space-y-6">
+          {templates.map((template) => (
+            <div
+              key={template.id}
+              className="p-4 mb-4 bg-white rounded-lg shadow dark:bg-gray-800"
+            >
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                {template.title}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {template.description}
+              </p>
+              <div className="flex items-center gap-3 mt-4">
+                <span
+                  className="cursor-pointer"
+                  onClick={() => handleLikeClick(template.id)}
+                >
+                  {likedTemplates.get(template.id) ? "❤️" : "🤍"}
+                </span>
+                <Link
+                  to={`/teamplate/${template.id}`}
+                  onClick={() => incrementViews(template.id)}
+                  className="text-gray-900 dark:text-white border border-gray-800 dark:bg-blue-500 font-medium rounded-lg text-sm px-5 py-2.5"
+                >
+                  Посмотреть шаблон
+                </Link>
+                <button
+                  onClick={() => loadComments(template.id)}
+                  className="text-gray-900 dark:text-white border border-gray-800 dark:bg-blue-500 font-medium rounded-lg text-sm px-5 py-2.5"
+                >
+                  Комментарии &#128173;
+                </button>
+              </div>
+              {currentTemplate === template.id && (
+                <div className="mt-4">
+                  <CommentSection
+                    comments={comments}
+                    onCommentSubmit={handleCommentSubmit}
+                    newComment={newComment}
+                    setNewComment={setNewComment}
+                  />
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        ))}
+          ))}
+
+          {loading && (
+            <div className="flex justify-center">
+              <LoadingSpinner />
+            </div>
+          )}
+        </div>
       </div>
       <Footer />
-    </div>
+    </>
   );
 };
 
-export default FormFill;
+export default FormFillPage;

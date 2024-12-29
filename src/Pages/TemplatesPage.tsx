@@ -1,15 +1,18 @@
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
+import { t } from "i18next";
 import { v4 as uuidv4 } from "uuid";
-
+import toast from "react-hot-toast";
+import LoadingSpinner from "../Components/LoadingSpinner";
 interface Option {
   id: string;
   value: string;
-  checked?: boolean;
+  checked: boolean;
 }
 
 interface Question {
   id: string;
+  template_id?: string;
   type: string;
   title: string;
   description: string;
@@ -18,81 +21,111 @@ interface Question {
 
 interface Template {
   id: string;
+  access_type: string;
+  description: string;
+  author: string;
   gmail: string;
   title: string;
-  author: string;
-  accessType: string;
-  description: string;
+  likes: number;
+  views: number;
+  created_at: string;
+  updated_at: string;
   questions: Question[];
 }
 
 const TemplatesPage: React.FC = () => {
-  const { t } = useTranslation();
-  const [templates, setTemplates] = useState<Template[]>([
-    {
-      id: "1",
-      accessType: "private",
-      description: "how long your experience?",
-      author: "Sarvar",
-      gmail: "sarvarkalmuratov370@gmail.com",
-      title: "title",
-      questions: [
-        {
-          id: "1733820461638",
-          type: "text",
-          title: "How you long?",
-          description: "Расскажите подробно",
-          options: [],
-        },
-        {
-          id: "1733820491706",
-          type: "checkbox",
-          title: "Какие фрукты вы любите?",
-          description: "Выделите все",
-          options: [
-            { id: "1733820514718", value: "Апельсин", checked: false },
-            { id: "1733820510062", value: "Банан", checked: false },
-          ],
-        },
-      ],
-    },
-  ]);
-
-  const [isEditing, setIsEditing] = useState(false);
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
-
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const questionTypes = [
     { value: "text", label: (t as any)("Text") },
+    { value: "textarea", label: (t as any)("Textarea") },
+    { value: "number", label: (t as any)("Number") },
     { value: "checkbox", label: (t as any)("Checkbox") },
     { value: "radio", label: (t as any)("Radio") },
-    { value: "number", label: (t as any)("number") },
   ];
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const gmail = localStorage.getItem("email");
+      if (!gmail) return;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const pageSize = 10;
+        const offset = (currentPage - 1) * pageSize;
+
+        const {
+          data: templatesData,
+          error: templatesError,
+          count,
+        } = await supabase
+          .from("templates")
+          .select("*", { count: "exact" })
+          .eq("gmail", gmail)
+          .range(offset, offset + pageSize - 1);
+
+        if (templatesError || !templatesData) {
+          throw new Error(
+            templatesError?.message || "Failed to fetch templates"
+          );
+        }
+
+        const totalTemplatesCount = count ?? 0;
+        setTotalPages(Math.ceil(totalTemplatesCount / pageSize));
+        const templateIds = templatesData.map((t) => t.id);
+        const { data: questionsData, error: questionsError } = await supabase
+          .from("questions")
+          .select("*, options(*)")
+          .in("template_id", templateIds);
+
+        if (questionsError) {
+          throw new Error(
+            questionsError.message || "Failed to fetch questions"
+          );
+        }
+
+        const questionsByTemplate = questionsData?.reduce((acc, question) => {
+          if (!acc[question.template_id]) {
+            acc[question.template_id] = [];
+          }
+          acc[question.template_id].push(question);
+          return acc;
+        }, {} as Record<string, any[]>);
+
+        const templatesWithDetails = templatesData.map((template) => ({
+          ...template,
+          questions: questionsByTemplate[template.id] || [],
+        }));
+
+        setTemplates(templatesWithDetails as Template[]);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, [currentPage]);
 
   const handleEditClick = (template: Template) => {
     setEditingTemplate(template);
     setIsEditing(true);
   };
 
-  const handleSaveChanges = () => {
-    if (editingTemplate) {
-      setTemplates((prevTemplates) =>
-        prevTemplates.map((template) =>
-          template.id === editingTemplate.id ? editingTemplate : template
-        )
-      );
-      setIsEditing(false);
-      setEditingTemplate(null);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditingTemplate(null);
-  };
-
   const handleTemplateChange = (field: keyof Template, value: any) => {
-    if (!editingTemplate) return;
-    setEditingTemplate({ ...editingTemplate, [field]: value });
+    if (editingTemplate) {
+      setEditingTemplate({ ...editingTemplate, [field]: value });
+    }
   };
 
   const handleQuestionChange = (
@@ -100,61 +133,134 @@ const TemplatesPage: React.FC = () => {
     field: keyof Question,
     value: any
   ) => {
-    if (!editingTemplate) return;
-    const updatedQuestions = editingTemplate.questions.map((question) =>
-      question.id === questionId ? { ...question, [field]: value } : question
-    );
-    setEditingTemplate({ ...editingTemplate, questions: updatedQuestions });
+    if (editingTemplate) {
+      setEditingTemplate({
+        ...editingTemplate,
+        questions: editingTemplate.questions.map((q) =>
+          q.id === questionId ? { ...q, [field]: value } : q
+        ),
+      });
+    }
   };
 
   const handleAddQuestion = () => {
-    if (!editingTemplate) return;
-    const newQuestion: Question = {
-      id: uuidv4(),
-      type: "text",
-      title: "",
-      description: "",
-      options: [],
-    };
-    setEditingTemplate({
-      ...editingTemplate,
-      questions: [...editingTemplate.questions, newQuestion],
-    });
+    if (editingTemplate) {
+      const newQuestion: Question = {
+        id: uuidv4(),
+        title: "",
+        description: "",
+        type: "text",
+        options: [],
+      };
+      setEditingTemplate({
+        ...editingTemplate,
+        questions: [...editingTemplate.questions, newQuestion],
+      });
+    }
   };
 
   const handleAddOption = (questionId: string) => {
-    if (!editingTemplate) return;
-
-    const updatedQuestions = editingTemplate.questions.map((question) =>
-      question.id === questionId
-        ? {
-            ...question,
-            options: [
-              ...question.options,
-              { id: uuidv4(), value: "", checked: false },
-            ],
-          }
-        : question
-    );
-
-    setEditingTemplate({ ...editingTemplate, questions: updatedQuestions });
+    if (editingTemplate) {
+      const newOption: Option = { id: uuidv4(), value: "", checked: false };
+      setEditingTemplate({
+        ...editingTemplate,
+        questions: editingTemplate.questions.map((q) =>
+          q.id === questionId ? { ...q, options: [...q.options, newOption] } : q
+        ),
+      });
+    }
   };
 
   const handleRemoveOption = (questionId: string, optionId: string) => {
+    if (editingTemplate) {
+      setEditingTemplate({
+        ...editingTemplate,
+        questions: editingTemplate.questions.map((q) =>
+          q.id === questionId
+            ? {
+                ...q,
+                options: q.options.filter((option) => option.id !== optionId),
+              }
+            : q
+        ),
+      });
+    }
+  };
+
+  const handleSaveChanges = async () => {
     if (!editingTemplate) return;
 
-    const updatedQuestions = editingTemplate.questions.map((question) =>
-      question.id === questionId
-        ? {
-            ...question,
-            options: question.options.filter(
-              (option) => option.id !== optionId
-            ),
-          }
-        : question
-    );
+    setIsLoading(true);
+    const { id, questions, ...templateData } = editingTemplate;
 
-    setEditingTemplate({ ...editingTemplate, questions: updatedQuestions });
+    const { error: updateError } = await supabase
+      .from("templates")
+      .update(templateData)
+      .eq("id", id);
+
+    if (updateError) {
+      console.error(updateError);
+      return;
+    }
+
+    for (const question of questions) {
+      const { id: questionId, options, ...questionData } = question;
+
+      await supabase.from("questions").upsert({
+        id: questionId,
+        template_id: id,
+        ...questionData,
+      });
+
+      const { data: existingOptions, error: existingOptionsError } =
+        await supabase
+          .from("options")
+          .select("id")
+          .eq("question_id", questionId);
+
+      if (existingOptionsError) {
+        console.error(existingOptionsError);
+        toast.error((t as any)("Failed to save data"));
+        return;
+      }
+
+      const existingOptionIds = existingOptions.map((option) => option.id);
+      const optionIdsToDelete = existingOptionIds.filter(
+        (optionId) => !options.some((option) => option.id === optionId)
+      );
+
+      if (optionIdsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("options")
+          .delete()
+          .in("id", optionIdsToDelete);
+
+        if (deleteError) {
+          console.error(deleteError);
+          return;
+        }
+      }
+
+      for (const option of options) {
+        await supabase
+          .from("options")
+          .upsert({ question_id: questionId, ...option });
+      }
+    }
+
+    setIsLoading(false);
+    setIsEditing(false);
+    setEditingTemplate(null);
+    toast.success((t as any)("Data saved successfully"));
+  };
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditingTemplate(null);
   };
 
   return (
@@ -162,41 +268,49 @@ const TemplatesPage: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">
         {(t as any)("TemplatesManagement")}
       </h2>
-      <div className="space-y-4">
-        {templates.map((template) => (
-          <div
-            key={template.id}
-            className="border rounded-lg p-4 bg-gray-100 dark:bg-gray-800"
-          >
-            <h3 className="text-lg font-semibold">{template.title}</h3>
-            <p>
-              {(t as any)("Description")}:{" "}
-              <span className="text-xl font-semibold text-gray-900 dark:text-white">
-                {template.description}
-              </span>
-            </p>
-            <p>
-              {(t as any)("Author")}:{" "}
-              <span className="text-xl font-semibold text-gray-900 dark:text-white">
-                {template.author}
-              </span>
-            </p>
-            <p>
-              {(t as any)("AccessType")}:{" "}
-              <span className="text-xl font-semibold text-gray-900 dark:text-white">
-                {template.accessType}
-              </span>
-            </p>
-            <button
-              onClick={() => handleEditClick(template)}
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      {error ? (
+        <div className="p-4 border border-red-500 bg-red-100 text-red-700 rounded-lg text-center">
+          <h3 className="text-lg font-semibold">{(t as any)("Error")}</h3>
+          <p>{(t as any)("FailedToLoadData")}</p>
+        </div>
+      ) : loading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="space-y-4">
+          {templates.map((template) => (
+            <div
+              key={template.id}
+              className="border rounded-lg p-4 bg-gray-100 dark:bg-gray-800"
             >
-              {(t as any)("EditTemplate")}
-            </button>
-          </div>
-        ))}
-      </div>
-
+              <h3 className="text-lg font-semibold">{template.title}</h3>
+              <p>
+                {(t as any)("Description")}:{" "}
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {template.description}
+                </span>
+              </p>
+              <p>
+                {(t as any)("Author")}:{" "}
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {template.author}
+                </span>
+              </p>
+              <p>
+                {(t as any)("AccessType")}:{" "}
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {template.access_type}
+                </span>
+              </p>
+              <button
+                onClick={() => handleEditClick(template)}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                {(t as any)("EditTemplate")}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       {isEditing && editingTemplate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-11/12 max-w-4xl overflow-y-auto max-h-screen">
@@ -228,9 +342,9 @@ const TemplatesPage: React.FC = () => {
                 {(t as any)("AccessType")}
               </label>
               <select
-                value={editingTemplate.accessType}
+                value={editingTemplate.access_type}
                 onChange={(e) =>
-                  handleTemplateChange("accessType", e.target.value)
+                  handleTemplateChange("access_type", e.target.value)
                 }
                 className="w-full p-2 border border-gray-300 rounded dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
               >
@@ -348,13 +462,32 @@ const TemplatesPage: React.FC = () => {
                   onClick={handleSaveChanges}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 >
-                  {(t as any)("SaveChanges")}
+                  {isLoading ? <LoadingSpinner /> : (t as any)("SaveChanges")}
                 </button>
               </div>
             </div>
           </div>
         </div>
-      )}
+      )}{" "}
+      <div className="mt-8 flex justify-between ">
+        <button
+          className="bg-blue-500 text-white py-2 px-4 rounded-md"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          {(t as any)("Previous")}
+        </button>
+        <span className="text-xl">
+          {currentPage} / {totalPages}
+        </span>
+        <button
+          className="bg-blue-500 text-white py-2 px-4 rounded-md"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          {(t as any)("Next")}
+        </button>
+      </div>
     </div>
   );
 };

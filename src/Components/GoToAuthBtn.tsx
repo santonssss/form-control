@@ -8,7 +8,6 @@ const GoToAuthBtn = (props: Props) => {
   const { t } = useTranslation();
   const access_token = localStorage.getItem("accessToken");
   const email = localStorage.getItem("email");
-  console.log(email);
 
   const isAuth = () => {
     if (email === "" || email === undefined || email === null) {

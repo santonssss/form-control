@@ -12,7 +12,7 @@ const Header = (props: Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white text-white p-4 dark:bg-gray-800 dark:text-white">
+    <header className="bg-white transition-all duration-300 text-white p-4 dark:bg-gray-800 dark:text-white">
       <div className="max-w-screen-xl mx-auto flex justify-between items-center">
         <div className="text-xl font-bold text-black dark:text-white">
           <Link to="/" className="hover:text-gray-300">

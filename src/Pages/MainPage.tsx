@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Gallery from "../Components/Gallery";
 import Header from "../Components/Header";
@@ -5,77 +6,114 @@ import SearchBar from "../Components/SearchBar";
 import PopularTemplates from "../Components/PopularTemplates";
 import TagsCloud from "../Components/TagsCloud";
 import Footer from "../Components/Footer";
+import { supabase } from "../supabaseClient";
 
 type Props = {};
 
 const MainPage = (props: Props) => {
-  const handleSearch = (query: string) => {
-    console.log("Ищем:", query);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [popularTemplates, setPopularTemplates] = useState<any[]>([]);
+  const [lastTemplates, setLastTemplates] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResultVisible, setSearchResultVisible] =
+    useState<boolean>(false);
+  const [noResults, setNoResults] = useState<boolean>(false);
+  const { t } = useTranslation();
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (!query) {
+      fetchPopularTemplates();
+      setSearchResultVisible(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("templates")
+        .select("*")
+        .ilike("title", `%${query}%`);
+
+      if (error) {
+        console.error("Ошибка при поиске шаблонов:", error);
+      } else {
+        setTemplates(data); // Применяем результаты поиска в `templates`
+        setSearchResultVisible(true);
+        if (data.length === 0) {
+          setNoResults(true);
+          setTimeout(() => {
+            setNoResults(false);
+            setSearchResultVisible(false);
+          }, 3000);
+        } else {
+          setNoResults(false);
+        }
+      }
+    } catch (error) {
+      console.error("Ошибка при загрузке шаблонов:", error);
+    }
   };
-  const fakeTemplates = [
-    {
-      id: "1",
-      title: "Шаблон 1",
-      description: "Описание шаблона 1",
-      author: "Автор 1",
-    },
-    {
-      id: "2",
-      title: "Шаблон 2",
-      description: "Описание шаблона 2",
-      author: "Автор 2",
-    },
-    {
-      id: "3",
-      title: "Шаблон 3",
-      description: "Описание шаблона 3",
-      author: "Автор 3",
-    },
-  ];
-  const popularTemplates = [
-    {
-      id: "1",
-      title: "Популярный шаблон 1",
-      description: "Описание 1",
-      author: "Автор 1",
-    },
-    {
-      id: "2",
-      title: "Популярный шаблон 2",
-      description: "Описание 2",
-      author: "Автор 2",
-    },
-    {
-      id: "3",
-      title: "Популярный шаблон 3",
-      description: "Описание 3",
-      author: "Автор 3",
-    },
-    {
-      id: "4",
-      title: "Популярный шаблон 4",
-      description: "Описание 4",
-      author: "Автор 4",
-    },
-    {
-      id: "5",
-      title: "Популярный шаблон 5",
-      description: "Описание 5",
-      author: "Автор 5",
-    },
-  ];
+
+  const fetchPopularTemplates = async () => {
+    const { data, error } = await supabase
+      .from("templates")
+      .select("*")
+      .order("views", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      console.error("Ошибка при загрузке популярных шаблонов:", error);
+    } else {
+      setPopularTemplates(data); // Используем отдельный стейт для популярных шаблонов
+    }
+  };
+
+  const fetchLastTemplates = async () => {
+    const { data, error } = await supabase
+      .from("templates")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    if (error) {
+      console.error("Ошибка при загрузке последних шаблонов:", error);
+    } else {
+      setLastTemplates(data); // Используем отдельный стейт для последних шаблонов
+    }
+  };
+
+  useEffect(() => {
+    fetchPopularTemplates();
+    fetchLastTemplates();
+  }, []);
+
   const tags = ["React", "TypeScript", "Tailwind", "Forms", "DarkMode"];
 
-  const { t } = useTranslation();
   return (
-    <div className="dark:bg-gray-700 ">
+    <div className="dark:bg-gray-700">
       <Header />
       <div className="max-w-screen-xl mr-auto ml-auto">
-        <SearchBar onSearch={handleSearch} />{" "}
+        <SearchBar onSearch={handleSearch} />
+        {searchResultVisible && (
+          <div className="min-h-[300px]">
+            {noResults ? (
+              <p className="text-xl font-semibold dark:text-white">
+                {(t as any)("NoResultsFound")}
+              </p>
+            ) : (
+              <>
+                <h2 className="text-2xl font-semibold mb-5 dark:text-white">
+                  {(t as any)("ResultSearch")}
+                </h2>
+                <Gallery templates={templates} />
+              </>
+            )}
+          </div>
+        )}
         <h2 className="text-2xl font-semibold mb-5 dark:text-white">
           {(t as any)("LastTeamplates")}
         </h2>
-        <Gallery templates={fakeTemplates} />
+        <Gallery templates={lastTemplates} />{" "}
         <PopularTemplates templates={popularTemplates} />
         <TagsCloud
           tags={tags}
