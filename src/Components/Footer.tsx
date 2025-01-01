@@ -8,7 +8,7 @@ const Footer: React.FC<Props> = () => {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-gray-100 fixed bottom-0 w-full  dark:bg-gray-800 text-gray-800 dark:text-gray-200 py-8">
+    <footer className="bg-gray-100  w-full  dark:bg-gray-800 text-gray-800 dark:text-gray-200 py-8">
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="flex flex-wrap justify-between items-center">
           <div className="mb-4">

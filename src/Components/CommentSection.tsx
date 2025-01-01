@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
 interface Comment {
@@ -33,9 +34,17 @@ const CommentSection = ({
 }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const accessToken = localStorage.getItem("accessToken");
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    if (
+      accessToken === "" ||
+      accessToken === "undefined" ||
+      accessToken === null
+    ) {
+      toast.error("You must be logged in to submit answers");
+      return;
+    }
     if (newComment.trim() === "") {
       setError((t as any)("Comment cannot be empty"));
       return;
