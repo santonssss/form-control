@@ -54,7 +54,13 @@ const UsersPage: React.FC = () => {
   const deleteUser = (id: string) => {
     setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
   };
-
+  if (true) {
+    return (
+      <div className="h-[100vh] w-full flex items-center justify-center text-red-400 font-bold font-mono">
+        {(t as any)("This page is only available to admins")}
+      </div>
+    );
+  }
   return (
     <div className="text-gray-800 dark:text-gray-100 p-4">
       <h2 className="text-2xl font-bold mb-4">

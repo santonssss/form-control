@@ -93,5 +93,6 @@
   "Success": "Success to delete teamplate",
   "CheckAnswer": "Check answer",
   "Back": "Back",
-  "This template is private so it's shared with you": "This template is private so it's shared with you!"
+  "This template is private so it's shared with you": "This template is private so it's shared with you!",
+  "This page is only available to admins": "This page is only available to admins!"
 }
