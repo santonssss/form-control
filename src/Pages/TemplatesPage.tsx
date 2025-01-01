@@ -4,6 +4,7 @@ import { t } from "i18next";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../Components/LoadingSpinner";
+import { useNavigate } from "react-router-dom";
 interface Option {
   id: string;
   value: string;
@@ -39,6 +40,7 @@ const TemplatesPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +51,20 @@ const TemplatesPage: React.FC = () => {
     { value: "checkbox", label: (t as any)("Checkbox") },
     { value: "radio", label: (t as any)("Radio") },
   ];
-
+  const navigateToRegister = () => {
+    navigate("/sign-up");
+  };
+  const accessToken = localStorage.getItem("accessToken");
   useEffect(() => {
+    localStorage.removeItem("accessToken");
+    if (
+      accessToken === "undefined" ||
+      accessToken === null ||
+      accessToken === ""
+    ) {
+      toast.error((t as any)("You must be logged in to submit answers"));
+      return;
+    }
     const fetchTemplates = async () => {
       const gmail = localStorage.getItem("email");
       if (!gmail) return;
@@ -81,9 +95,10 @@ const TemplatesPage: React.FC = () => {
         const totalTemplatesCount = count ?? 0;
         setTotalPages(Math.ceil(totalTemplatesCount / pageSize));
         const templateIds = templatesData.map((t) => t.id);
+
         const { data: questionsData, error: questionsError } = await supabase
           .from("questions")
-          .select("*, options(*)")
+          .select("*")
           .in("template_id", templateIds);
 
         if (questionsError) {
@@ -91,18 +106,36 @@ const TemplatesPage: React.FC = () => {
             questionsError.message || "Failed to fetch questions"
           );
         }
+        const { data: optionsData, error: optionsError } = await supabase
+          .from("options")
+          .select("*")
+          .in(
+            "question_id",
+            questionsData.map((q) => q.id)
+          );
 
-        const questionsByTemplate = questionsData?.reduce((acc, question) => {
-          if (!acc[question.template_id]) {
-            acc[question.template_id] = [];
+        if (optionsError) {
+          throw new Error(optionsError.message || "Failed to fetch options");
+        }
+
+        const optionsByQuestion = optionsData?.reduce((acc, option) => {
+          if (!acc[option.question_id]) {
+            acc[option.question_id] = [];
           }
-          acc[question.template_id].push(question);
+          acc[option.question_id].push(option);
           return acc;
         }, {} as Record<string, any[]>);
 
+        const questionsWithOptions = questionsData.map((question) => ({
+          ...question,
+          options: optionsByQuestion[question.id] || [],
+        }));
+
         const templatesWithDetails = templatesData.map((template) => ({
           ...template,
-          questions: questionsByTemplate[template.id] || [],
+          questions: questionsWithOptions.filter(
+            (question) => question.template_id === template.id
+          ),
         }));
 
         setTemplates(templatesWithDetails as Template[]);
@@ -268,7 +301,23 @@ const TemplatesPage: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">
         {(t as any)("TemplatesManagement")}
       </h2>
-      {error ? (
+      {!accessToken ||
+      accessToken === "undefined" ||
+      accessToken === null ||
+      accessToken === "" ? (
+        <div className="p-4 border border-yellow-500 bg-yellow-100 text-yellow-700 rounded-lg text-center">
+          <h3 className="text-lg font-semibold">
+            {(t as any)("PleaseRegister")}
+          </h3>
+          <p>{(t as any)("AccessRestricted")}</p>
+          <button
+            onClick={() => navigateToRegister()} // Функция навигации на страницу регистрации
+            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+          >
+            {(t as any)("Register")}
+          </button>
+        </div>
+      ) : error ? (
         <div className="p-4 border border-red-500 bg-red-100 text-red-700 rounded-lg text-center">
           <h3 className="text-lg font-semibold">{(t as any)("Error")}</h3>
           <p>{(t as any)("FailedToLoadData")}</p>

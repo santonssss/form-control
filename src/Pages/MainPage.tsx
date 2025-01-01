@@ -7,6 +7,7 @@ import PopularTemplates from "../Components/PopularTemplates";
 import TagsCloud from "../Components/TagsCloud";
 import Footer from "../Components/Footer";
 import { supabase } from "../supabaseClient";
+import ModalToSearch from "../Components/ModalToSearch";
 
 type Props = {};
 
@@ -18,6 +19,7 @@ const MainPage = (props: Props) => {
   const [searchResultVisible, setSearchResultVisible] =
     useState<boolean>(false);
   const [noResults, setNoResults] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { t } = useTranslation();
 
   const handleSearch = async (query: string) => {
@@ -32,19 +34,17 @@ const MainPage = (props: Props) => {
       const { data, error } = await supabase
         .from("templates")
         .select("*")
-        .ilike("title", `%${query}%`);
+        .ilike("title", `%${query}%`)
+        .eq("access_type", "public");
 
       if (error) {
         console.error("Ошибка при поиске шаблонов:", error);
       } else {
-        setTemplates(data); // Применяем результаты поиска в `templates`
+        setTemplates(data);
         setSearchResultVisible(true);
         if (data.length === 0) {
           setNoResults(true);
-          setTimeout(() => {
-            setNoResults(false);
-            setSearchResultVisible(false);
-          }, 3000);
+          setIsModalOpen(true);
         } else {
           setNoResults(false);
         }
@@ -58,13 +58,14 @@ const MainPage = (props: Props) => {
     const { data, error } = await supabase
       .from("templates")
       .select("*")
+      .eq("access_type", "public")
       .order("views", { ascending: false })
       .limit(5);
 
     if (error) {
       console.error("Ошибка при загрузке популярных шаблонов:", error);
     } else {
-      setPopularTemplates(data); // Используем отдельный стейт для популярных шаблонов
+      setPopularTemplates(data);
     }
   };
 
@@ -72,13 +73,14 @@ const MainPage = (props: Props) => {
     const { data, error } = await supabase
       .from("templates")
       .select("*")
+      .eq("access_type", "public")
       .order("created_at", { ascending: false })
       .limit(3);
 
     if (error) {
       console.error("Ошибка при загрузке последних шаблонов:", error);
     } else {
-      setLastTemplates(data); // Используем отдельный стейт для последних шаблонов
+      setLastTemplates(data);
     }
   };
 
@@ -94,22 +96,19 @@ const MainPage = (props: Props) => {
       <Header />
       <div className="max-w-screen-xl mr-auto ml-auto">
         <SearchBar onSearch={handleSearch} />
-        {searchResultVisible && (
-          <div className="min-h-[300px]">
-            {noResults ? (
-              <p className="text-xl font-semibold dark:text-white">
-                {(t as any)("NoResultsFound")}
-              </p>
-            ) : (
-              <>
-                <h2 className="text-2xl font-semibold mb-5 dark:text-white">
-                  {(t as any)("ResultSearch")}
-                </h2>
-                <Gallery templates={templates} />
-              </>
-            )}
-          </div>
-        )}
+        {searchResultVisible &&
+          (noResults ? (
+            isModalOpen && (
+              <ModalToSearch onClose={() => setIsModalOpen(false)} />
+            )
+          ) : (
+            <div className="min-h-[300px]">
+              <h2 className="text-2xl font-semibold mb-5 dark:text-white">
+                {(t as any)("ResultSearch")}
+              </h2>
+              <Gallery templates={templates} />
+            </div>
+          ))}
         <h2 className="text-2xl font-semibold mb-5 dark:text-white">
           {(t as any)("LastTeamplates")}
         </h2>

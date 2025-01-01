@@ -10,6 +10,7 @@ import FormFill from "./Pages/FormFillPage";
 import LoginForm from "./Pages/LoginPage";
 import SignUpForm from "./Pages/SingUp";
 import ViewToTeamplate from "./Pages/ViewToTeamplate";
+import ModalToCheckAnswers from "./Components/ModalToCheckAnswers";
 
 function App() {
   return (
@@ -25,6 +26,10 @@ function App() {
       <Route path="/login" element={<LoginForm />} />
       <Route path="/sign-up" element={<SignUpForm />} />
       <Route path="/teamplate/:id" element={<ViewToTeamplate />} />
+      <Route
+        path="/teamplate/check/answer/:id"
+        element={<ModalToCheckAnswers />}
+      />
     </Routes>
   );
 }

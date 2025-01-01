@@ -97,5 +97,10 @@
   "Your answer": "Ваш ответ",
   "Error checking existing answers": "Ошибка при проверке существующих ответов",
   "You have already submitted answers for this template": "Вы уже отправили ответы для этого шаблона",
-  "ResultSearch": "Результаты поиска"
+  "ResultSearch": "Результаты поиска",
+  "Success": "Успех при удаление шаблона из базы данных",
+  "CheckAnswer": "Посмотреть",
+  "PleaseRegister": "Войдите в систему",
+  "Back": "Назад",
+  "This template is private so it's shared with you": "Этот шаблон является приватным, поэтому вам показано в доступе!"
 }

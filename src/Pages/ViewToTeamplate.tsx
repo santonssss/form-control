@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
+import { Link } from "react-router-dom";
 
 type Props = {};
 
@@ -36,13 +37,14 @@ const ViewToTemplate = (props: Props) => {
       .from("templates")
       .select(
         `*,
-        questions (
-          *,
-          options (*)
-        )`
+    questions!questions_template_id_fkey (
+      * ,
+      options!options_question_id_fkey (*)
+    )`
       );
 
     if (error) {
+      console.log(error);
       toast.error((t as any)("Error finding template"));
       setLoading(false);
       return;
@@ -143,6 +145,7 @@ const ViewToTemplate = (props: Props) => {
           template_id: templateId,
           question_id: questionId,
           answer_text: answer,
+          email: gmail,
         };
       } else if (Array.isArray(answer)) {
         return answer.map((optionId) => ({
@@ -150,6 +153,7 @@ const ViewToTemplate = (props: Props) => {
           template_id: templateId,
           question_id: questionId,
           option_id: optionId,
+          email: gmail,
         }));
       }
     });
@@ -176,7 +180,18 @@ const ViewToTemplate = (props: Props) => {
       </div>
     );
   }
-
+  if (templates[0].accessType === "private") {
+    return (
+      <div className="h-[100vh] w-full text-red-500 font-bold flex items-center justify-center">
+        <span>
+          {(t as any)("This template is private so it's shared with you")}
+        </span>
+        <Link className="ml-2 text-blue-500 font-mono text-xl" to={"/"}>
+          {(t as any)("Back")}
+        </Link>
+      </div>
+    );
+  }
   return (
     <div className="transition-all duration-300 dark:bg-gray-800">
       <div className="dark:bg-gray-800 transition-all duration-300 max-w-7xl mx-auto bg-white">

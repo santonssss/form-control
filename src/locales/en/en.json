@@ -78,15 +78,20 @@
   "Comment cannot be empty": "Comment cannot be empty",
   "Error finding template": "Error finding template",
   "author": "Author",
-  "You must be logged in to submit answers": "You must be logged in to submit answers",
+  "You must be logged in to submit answers": "You must be logged",
   "Email is not available": "Email is not available",
   "Error fetching user ID": "Error fetching user ID",
   "User not found": "User not found",
   "Error submitting answers": "Error submitting answers",
   "Answers submitted successfully": "Answers submitted successfully",
   "Send": "Send",
+  "PleaseRegister": "Please sign in",
   "Your answer": "Your answer",
   "Error checking existing answers": "Error checking existing answers",
   "You have already submitted answers for this template": "You have already submitted answers for this template",
-  "ResultSearch": "Result search"
+  "ResultSearch": "Result search",
+  "Success": "Success to delete teamplate",
+  "CheckAnswer": "Check answer",
+  "Back": "Back",
+  "This template is private so it's shared with you": "This template is private so it's shared with you!"
 }

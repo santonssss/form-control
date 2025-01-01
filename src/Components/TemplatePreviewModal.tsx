@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { saveTemplateToSupabase } from "../func/uploadFunc";
 import { useTranslation } from "react-i18next";
 import LoadingSpinner from "./LoadingSpinner";
+import toast from "react-hot-toast";
 
 type Option = {
   id: string;
@@ -39,6 +40,15 @@ const TemplatePreviewModal: React.FC<Props> = ({
   const author = localStorage.getItem("fullName");
   const email = localStorage.getItem("email");
   const handleSave = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (
+      accessToken === "undefined" ||
+      accessToken === null ||
+      accessToken === ""
+    ) {
+      toast.error((t as any)("You must be logged in to submit answers"));
+      return;
+    }
     setIsSubmitting(true);
     try {
       await saveTemplateToSupabase(templateData, author, email, t);

@@ -13,6 +13,8 @@ import Footer from "../Components/Footer";
 import Header from "../Components/Header";
 import CommentSection from "../Components/CommentSection";
 import LoadingSpinner from "../Components/LoadingSpinner";
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface Template {
   id: string;
@@ -36,12 +38,11 @@ const FormFillPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
-
+  const { t } = useTranslation();
   const limit = 10;
   const [likedTemplates, setLikedTemplates] = useState<Map<string, boolean>>(
     new Map()
-  ); // хранение статуса лайков
-
+  );
   const loadTemplates = async () => {
     setLoading(true);
 
@@ -102,16 +103,19 @@ const FormFillPage = () => {
   const handleLikeClick = async (templateId: string) => {
     const email = localStorage.getItem("email");
 
-    if (!email) return; // Если нет email, ничего не делаем
+    if (!email) {
+      toast.error((t as any)("You must be logged in to submit answers"));
+      return;
+    }
 
     const isLiked = likedTemplates.get(templateId);
 
     if (isLiked) {
       await removeLike(templateId, email);
-      setLikedTemplates((prev) => new Map(prev).set(templateId, false)); // Обновляем состояние
+      setLikedTemplates((prev) => new Map(prev).set(templateId, false));
     } else {
       await addLike(templateId, email);
-      setLikedTemplates((prev) => new Map(prev).set(templateId, true)); // Обновляем состояние
+      setLikedTemplates((prev) => new Map(prev).set(templateId, true));
     }
   };
 
