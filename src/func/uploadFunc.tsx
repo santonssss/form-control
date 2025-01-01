@@ -189,14 +189,17 @@ export const fetchComments = async (
   if (error) throw error;
   return data as FetchCommentsResponse;
 };
-
 export const postComment = async (
   templateId: string,
   content: string
-): Promise<void> => {
+): Promise<{ data: any; error: any }> => {
   const fullname = localStorage.getItem("fullName");
+
   const { data, error } = await supabase
     .from("comments")
     .insert([{ template_id: templateId, content, author: fullname }]);
+
   if (error) throw error;
+
+  return { data, error };
 };

@@ -15,6 +15,7 @@ import CommentSection from "../Components/CommentSection";
 import LoadingSpinner from "../Components/LoadingSpinner";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { supabase } from "../supabaseClient";
 
 interface Template {
   id: string;
@@ -76,27 +77,94 @@ const FormFillPage = () => {
     return array.sort(() => Math.random() - 0.5);
   };
 
-  const loadComments = async (templateId: string) => {
+  const loadCommentsRealtime = async (templateId: string) => {
     if (currentTemplate === templateId) {
       setComments([]);
       setCurrentTemplate(null);
-    } else {
-      setLoading(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
       const data = await fetchComments(templateId);
       setComments(data);
+
       setCurrentTemplate(templateId);
+
+      const channel = supabase
+        .channel(`public:comments:template_${templateId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "comments",
+            filter: `template_id=eq.${templateId}`,
+          },
+          (payload) => {
+            if (payload.eventType === "INSERT") {
+              console.log("insert");
+
+              setComments((prev) => [...prev, payload.new as Comment]);
+            } else if (payload.eventType === "DELETE") {
+              console.log("delete");
+
+              setComments((prev) =>
+                prev.filter((comment) => comment.id !== payload.old.id)
+              );
+            } else if (payload.eventType === "UPDATE") {
+              console.log("update");
+
+              setComments((prev) =>
+                prev.map((comment) =>
+                  comment.id === payload.new.id
+                    ? (payload.new as Comment)
+                    : comment
+                )
+              );
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      console.error("Error loading comments:", error);
+    } finally {
       setLoading(false);
     }
   };
-
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newComment.trim() === "") return;
 
     if (currentTemplate) {
-      await postComment(currentTemplate, newComment);
-      await loadComments(currentTemplate);
-      setNewComment("");
+      try {
+        const { data, error } = await postComment(currentTemplate, newComment);
+
+        if (error) {
+          console.error("Error posting comment:", error);
+          return;
+        }
+
+        if (data) {
+          setComments((prev) => [
+            ...prev,
+            {
+              id: data.id,
+              content: newComment,
+              author: localStorage.getItem("email") || "Anonymous",
+              created_at: new Date().toISOString(),
+            },
+          ]);
+
+          setNewComment("");
+        }
+      } catch (error) {
+        console.error("Error in handleCommentSubmit:", error);
+      }
     }
   };
 
@@ -183,7 +251,7 @@ const FormFillPage = () => {
                   Посмотреть шаблон
                 </Link>
                 <button
-                  onClick={() => loadComments(template.id)}
+                  onClick={() => loadCommentsRealtime(template.id)}
                   className="text-gray-900 dark:text-white border border-gray-800 dark:bg-blue-500 font-medium rounded-lg text-sm px-5 py-2.5"
                 >
                   Комментарии &#128173;

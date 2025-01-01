@@ -33,10 +33,10 @@ const SignUpForm: React.FC = () => {
 
         const { error: insertError } = await supabase.from("users").insert([
           {
-            email: userEmail, // Email пользователя
-            name: name, // Имя пользователя
-            is_admin: false, // Поле is_admin по умолчанию false
-            status: "active", // Устанавливаем статус по умолчанию
+            email: userEmail,
+            name: name,
+            is_admin: false,
+            status: "active",
           },
         ]);
 
