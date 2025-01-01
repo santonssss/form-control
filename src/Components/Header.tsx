@@ -4,13 +4,14 @@ import ToggleTheme from "./ToggleTheme";
 import ToggleLanguage from "./ToggleLanguage";
 import { useTranslation } from "react-i18next";
 import GoToAuthBtn from "./GoToAuthBtn";
+import toast from "react-hot-toast";
 
 type Props = {};
 
 const Header = (props: Props) => {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const accessToken = localStorage.getItem("accessToken");
   return (
     <header className="bg-white transition-all duration-300 text-white p-4 dark:bg-gray-800 dark:text-white">
       <div className="max-w-screen-xl mx-auto flex justify-between items-center">
@@ -59,6 +60,21 @@ const Header = (props: Props) => {
         </nav>
 
         <div className="hidden md:flex items-center justify-center space-x-4">
+          {accessToken === "" ||
+          accessToken === null ||
+          accessToken === "undefined" ? null : (
+            <button
+              onClick={() => {
+                localStorage.removeItem("email");
+                localStorage.removeItem("accessToken");
+                toast.success("success");
+                window.location.reload();
+              }}
+              className="bg-blue-500 rounded-lg py-1 px-2 text-white"
+            >
+              {(t as any)("log out")}
+            </button>
+          )}{" "}
           <ToggleTheme />
           <ToggleLanguage />
           <GoToAuthBtn />
@@ -99,6 +115,21 @@ const Header = (props: Props) => {
           </nav>
 
           <div className="flex flex-col space-y-2 p-4 border-t border-gray-300 dark:border-gray-600">
+            {accessToken === "" ||
+            accessToken === null ||
+            accessToken === "undefined" ? null : (
+              <button
+                onClick={() => {
+                  localStorage.removeItem("email");
+                  localStorage.removeItem("accessToken");
+                  toast.success("success");
+                  window.location.reload();
+                }}
+                className="bg-blue-500 rounded-lg py-1 px-2 text-white"
+              >
+                {(t as any)("log out")}
+              </button>
+            )}
             <ToggleTheme />
             <ToggleLanguage />
           </div>
