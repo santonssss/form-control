@@ -56,7 +56,6 @@ const TemplatesPage: React.FC = () => {
   };
   const accessToken = localStorage.getItem("accessToken");
   useEffect(() => {
-    localStorage.removeItem("accessToken");
     if (
       accessToken === "undefined" ||
       accessToken === null ||
@@ -301,8 +300,7 @@ const TemplatesPage: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">
         {(t as any)("TemplatesManagement")}
       </h2>
-      {!accessToken ||
-      accessToken === "undefined" ||
+      {accessToken === "undefined" ||
       accessToken === null ||
       accessToken === "" ? (
         <div className="p-4 border border-yellow-500 bg-yellow-100 text-yellow-700 rounded-lg text-center">
@@ -311,7 +309,7 @@ const TemplatesPage: React.FC = () => {
           </h3>
           <p>{(t as any)("AccessRestricted")}</p>
           <button
-            onClick={() => navigateToRegister()} // Функция навигации на страницу регистрации
+            onClick={() => navigateToRegister()}
             className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
           >
             {(t as any)("Register")}
