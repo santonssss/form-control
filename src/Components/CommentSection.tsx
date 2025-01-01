@@ -44,7 +44,10 @@ const CommentSection = ({
     setError(null);
     onCommentSubmit(e);
   };
-
+  const sortedComments = [...comments].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
   return (
     <section className="dark:bg-gray-900 py-8 lg:py-16 antialiased  ">
       <div className="max-w-2xl mx-auto px-4">
@@ -76,7 +79,7 @@ const CommentSection = ({
           </button>
         </form>
         <article className=" text-base bg-white rounded-lg dark:bg-gray-900 h-[300px] overflow-y-scroll">
-          {comments.map((comment) => (
+          {sortedComments.map((comment) => (
             <footer
               key={comment.id}
               className="flex justify-between flex-col w-full border my-2 "
