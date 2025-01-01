@@ -8,18 +8,15 @@ const Footer: React.FC<Props> = () => {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-gray-100  dark:bg-gray-800 text-gray-800 dark:text-gray-200 py-8">
+    <footer className="bg-gray-100 fixed bottom-0 w-full  dark:bg-gray-800 text-gray-800 dark:text-gray-200 py-8">
       <div className="max-w-screen-xl mx-auto px-4">
-        {/* Верхний блок футера */}
         <div className="flex flex-wrap justify-between items-center">
-          {/* Логотип */}
           <div className="mb-4">
             <Link to="/" className="text-xl font-bold dark:text-white">
               Form-Control
             </Link>
           </div>
 
-          {/* Социальные сети */}
           <div className="flex space-x-4 mb-4">
             <a
               href="https://facebook.com"
@@ -48,7 +45,6 @@ const Footer: React.FC<Props> = () => {
           </div>
         </div>
 
-        {/* Нижний блок футера */}
         <div className="border-t border-gray-300 dark:border-gray-700 mt-4 pt-4 text-sm text-center">
           <p>
             {(t as any)("FooterCopy")} © {new Date().getFullYear()}{" "}

@@ -89,8 +89,6 @@ const MainPage = (props: Props) => {
     fetchLastTemplates();
   }, []);
 
-  const tags = ["React", "TypeScript", "Tailwind", "Forms", "DarkMode"];
-
   return (
     <div className="dark:bg-gray-700">
       <Header />
@@ -114,10 +112,6 @@ const MainPage = (props: Props) => {
         </h2>
         <Gallery templates={lastTemplates} />{" "}
         <PopularTemplates templates={popularTemplates} />
-        <TagsCloud
-          tags={tags}
-          onTagClick={(tag) => console.log(`Клик по тегу: ${tag}`)}
-        />
       </div>
       <Footer />
     </div>
