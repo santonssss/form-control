@@ -32,6 +32,7 @@ const FormsPage: React.FC = () => {
   };
   useEffect(() => {
     const fetchForms = async () => {
+      const email = localStorage.getItem("email");
       if (
         accessToken === "undefined" ||
         accessToken === null ||
@@ -45,8 +46,8 @@ const FormsPage: React.FC = () => {
       try {
         const { data: templates, error: templatesError } = await supabase
           .from("templates")
-          .select("id, title, created_at, author, gmail");
-
+          .select("id, title, created_at, author, gmail")
+          .eq("gmail", email);
         if (templatesError) throw templatesError;
 
         const templatesWithResponses = await Promise.all(
@@ -146,7 +147,12 @@ const FormsPage: React.FC = () => {
     <div className="p-4 dark:bg-gray-800 dark:text-white">
       <h1 className="text-2xl font-bold mb-4">
         {(t as any)("FormsManagement")}
-      </h1>
+      </h1>{" "}
+      {forms.length === 0 ? (
+        <div className="text-center text-xl font-semibold text-gray-500 dark:text-gray-300">
+          {(t as any)("NoFormsFound")}
+        </div>
+      ) : null}
       {!accessToken ||
       accessToken === "undefined" ||
       accessToken === null ||
@@ -206,7 +212,6 @@ const FormsPage: React.FC = () => {
           ))}
         </div>
       )}
-
       {isModalOpen && (
         <div
           id="select-modal"

@@ -6,6 +6,7 @@ import { supabase } from "../supabaseClient";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
+import { Link } from "react-router-dom";
 
 type Props = {};
 
@@ -27,7 +28,7 @@ const ModalToCheckAnswers = (props: Props) => {
   const { t } = useTranslation();
   const { id } = useParams();
   const userEmail = localStorage.getItem("email");
-
+  const accessToken = localStorage.getItem("accessToken");
   const fetchTemplateAndAnswers = async () => {
     setLoading(true);
 
@@ -83,7 +84,20 @@ const ModalToCheckAnswers = (props: Props) => {
   useEffect(() => {
     if (id && userEmail) fetchTemplateAndAnswers();
   }, [id, userEmail]);
-
+  if (
+    accessToken === "undefined" ||
+    accessToken === null ||
+    accessToken === ""
+  ) {
+    return (
+      <div className="h-[100vh] gap-3 text-red-500 flex items-center justify-center font-mono">
+        <span> {(t as any)("PleaseRegister")}</span>
+        <Link className="text-blue-400 cursor-pointer" to={"/sign-up"}>
+          {(t as any)("Back")}
+        </Link>
+      </div>
+    );
+  }
   if (loading) {
     return (
       <div className="h-[100vh] flex items-center justify-center">
@@ -110,7 +124,6 @@ const ModalToCheckAnswers = (props: Props) => {
           <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
             {(t as any)("Answers for Template")} {template.id}
           </h2>
-
           {template.questions.map((question) => (
             <div key={question.id} className="mb-6">
               <h3 className="font-medium text-lg text-gray-800 dark:text-gray-100">
@@ -119,7 +132,6 @@ const ModalToCheckAnswers = (props: Props) => {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {question.description}
               </p>
-
               {question.type === "text" && (
                 <input
                   type="text"
@@ -128,7 +140,14 @@ const ModalToCheckAnswers = (props: Props) => {
                   className="mt-3 p-3 border border-gray-300 rounded-md w-full bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               )}
-
+              {question.type === "number" && (
+                <input
+                  type="number"
+                  value={answers[question.id] || ""}
+                  readOnly
+                  className="mt-3 p-3 border border-gray-300 rounded-md w-full bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              )}
               {question.type === "textarea" && (
                 <textarea
                   value={answers[question.id] || ""}

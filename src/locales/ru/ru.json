@@ -112,5 +112,7 @@
   "Длинный ответ": "Long answer",
   "Числовой ответ": "Number answer",
   "Множественный выбор": "Multiple choice",
-  "Один вариант": "Single choice"
+  "Один вариант": "Single choice",
+  "Please answer all questions before submitting the form": "Пожалуйста, ответьте на все вопросы перед отправкой формы",
+  "NoFormsFound": "Ничего не найдено"
 }

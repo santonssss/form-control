@@ -29,7 +29,6 @@ const CreateForm = (props: Props) => {
       <div className="max-w-screen-xl mr-auto ml-auto w-[95%]">
         <TemplateSettings onSave={handleSaveSettings} />
       </div>
-
       <TemplatePreviewModal
         showModal={showModal}
         templateData={templateData}

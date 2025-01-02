@@ -26,7 +26,7 @@ interface Template {
 }
 
 const ViewToTemplate = (props: Props) => {
-  const { id } = useParams<{ id: string }>(); // Получаем id из URL
+  const { id } = useParams<{ id: string }>();
   const [template, setTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<{ [key: string]: any }>({});
@@ -135,7 +135,26 @@ const ViewToTemplate = (props: Props) => {
       );
       return;
     }
+    if (!template?.questions || template.questions.length === 0) {
+      toast.error((t as any)("No questions found in the template"));
+      return;
+    }
 
+    const unansweredQuestions =
+      template.questions.filter(
+        (question) =>
+          !answers ||
+          !answers[question.id] ||
+          (Array.isArray(answers[question.id]) &&
+            answers[question.id].length === 0)
+      ) || [];
+
+    if (unansweredQuestions.length > 0) {
+      toast.error(
+        (t as any)("Please answer all questions before submitting the form")
+      );
+      return;
+    }
     const entries = Object.entries(answers).map(([questionId, answer]) => {
       const question = template?.questions.find((q) => q.id === questionId);
 
@@ -210,7 +229,6 @@ const ViewToTemplate = (props: Props) => {
     <div className="transition-all duration-300 dark:bg-gray-800">
       <div className="dark:bg-gray-800 transition-all duration-300 max-w-7xl mx-auto bg-white">
         <Header />
-        <h1>{template.title}</h1>
         <div className="max-w-screen-lg h-[100vh] flex items-center justify-center mx-auto p-6 space-y-8">
           <div className="rounded-lg p-6 w-full bg-white dark:bg-gray-800 shadow-xl transition-all duration-300">
             <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
@@ -243,7 +261,26 @@ const ViewToTemplate = (props: Props) => {
                       }
                     />
                   )}
-
+                  {question.type === "textarea" && (
+                    <textarea
+                      className="mt-3 p-3 border border-gray-300 rounded-md w-full bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      placeholder={(t as any)("Your answer")}
+                      rows={4}
+                      onChange={(e) =>
+                        handleInputChange(question.id, e.target.value)
+                      }
+                    />
+                  )}
+                  {question.type === "number" && (
+                    <input
+                      type="number"
+                      className="mt-3 p-3 border border-gray-300 rounded-md w-full bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      placeholder={(t as any)("Your answer")}
+                      onChange={(e) =>
+                        handleInputChange(question.id, e.target.value || "")
+                      }
+                    />
+                  )}
                   {question.type === "checkbox" &&
                     question.options.map((option) => (
                       <div key={option.id} className="flex items-center mt-4">

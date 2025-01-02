@@ -40,38 +40,10 @@ const FormFillPage = () => {
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const { t } = useTranslation();
-  const limit = 10;
+  const limit = 5;
   const [likedTemplates, setLikedTemplates] = useState<Map<string, boolean>>(
     new Map()
   );
-  const loadTemplates = async () => {
-    setLoading(true);
-
-    const start = page * limit;
-    const end = start + limit;
-
-    try {
-      const data = await fetchTemplates(start, limit);
-      if (data.length < limit) {
-        setHasMore(false);
-      }
-
-      setTemplates((prev) => {
-        const prevIds = prev.map((template) => template.id);
-        const uniqueData = data.filter(
-          (template) => !prevIds.includes(template.id)
-        );
-
-        return [...prev, ...shuffleArray(uniqueData)];
-      });
-
-      setPage((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error fetching templates:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const shuffleArray = (array: Template[]): Template[] => {
     return array.sort(() => Math.random() - 0.5);
@@ -187,14 +159,52 @@ const FormFillPage = () => {
     }
   };
 
-  useEffect(() => {
-    loadTemplates();
-    window.addEventListener("scroll", handleScroll);
+  const loadTemplates = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
 
+    const start = page * limit;
+    const end = start + limit;
+
+    try {
+      const data = await fetchTemplates(start, limit);
+
+      if (data.length < limit) {
+        setHasMore(false);
+      }
+
+      setTemplates((prev) => {
+        const prevIds = prev.map((template) => template.id);
+        const uniqueData = data.filter(
+          (template) => !prevIds.includes(template.id)
+        );
+
+        return [...prev, ...shuffleArray(uniqueData)];
+      });
+
+      setPage((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleScroll = () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (scrollTop + clientHeight >= scrollHeight - 5) {
+      loadTemplates();
+    }
+  };
+
+  useEffect(() => {
+    const onScroll = () => handleScroll();
+    loadTemplates();
+    window.addEventListener("scroll", onScroll);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [loading, hasMore]);
 
   useEffect(() => {
     const checkLikes = async () => {
@@ -212,13 +222,6 @@ const FormFillPage = () => {
 
     checkLikes();
   }, [templates]);
-
-  const handleScroll = () => {
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (scrollTop + clientHeight >= scrollHeight - 5 && !loading && hasMore) {
-      loadTemplates();
-    }
-  };
 
   return (
     <>

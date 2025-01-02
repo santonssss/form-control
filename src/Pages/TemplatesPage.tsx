@@ -300,6 +300,11 @@ const TemplatesPage: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">
         {(t as any)("TemplatesManagement")}
       </h2>
+      {templates.length === 0 ? (
+        <div className="text-center text-xl font-semibold text-gray-500 dark:text-gray-300">
+          {(t as any)("NoFormsFound")}
+        </div>
+      ) : null}
       {accessToken === "undefined" ||
       accessToken === null ||
       accessToken === "" ? (

@@ -103,5 +103,7 @@
   "Длинный ответ": "Длинный ответ",
   "Числовой ответ": "Числовой ответ",
   "Множественный выбор": "Множественный выбор",
-  "Один вариант": "Один вариант"
+  "Один вариант": "Один вариант",
+  "Please answer all questions before submitting the form": "Please answer all questions before submitting the form",
+  "NoFormsFound": "No forms found"
 }

@@ -38,7 +38,7 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
     initialData?.description || ""
   );
   const [accessType, setAccessType] = useState(
-    initialData?.accessType || "private"
+    initialData?.accessType || "public"
   );
   const [questions, setQuestions] = useState<Question[]>(
     initialData?.questions || []
