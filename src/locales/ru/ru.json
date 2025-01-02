@@ -107,5 +107,10 @@
   "Discussion": "Комментарии",
   "Your comment": "Ваш комментарий",
   "Post comment": "Опубликовать",
-  "log out": "Выйти"
+  "log out": "Выйти",
+  "Короткий ответ": "Short answer",
+  "Длинный ответ": "Long answer",
+  "Числовой ответ": "Number answer",
+  "Множественный выбор": "Multiple choice",
+  "Один вариант": "Single choice"
 }

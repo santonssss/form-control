@@ -108,8 +108,8 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
         onChange={(e) => setAccessType(e.target.value)}
         className="block w-full mt-2 p-2 border rounded dark:bg-gray-800 dark:text-white"
       >
-        <option value="private">{(t as any)("Private")}</option>
         <option value="public">{(t as any)("Public")}</option>
+        <option value="private">{(t as any)("Private")}</option>
       </select>
 
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -119,17 +119,21 @@ const TemplateSettings: React.FC<Props> = ({ onSave, initialData }) => {
               {(t as any)("Questions")}
             </h3>
             <div className="flex space-x-2 overflow-hidden overflow-x-scroll ">
-              {["text", "textarea", "number", "checkbox", "radio"].map(
-                (type) => (
-                  <button
-                    key={type}
-                    onClick={() => handleAddQuestion(type as Question["type"])}
-                    className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    {(t as any)(type)}
-                  </button>
-                )
-              )}
+              {[
+                { type: "text", label: (t as any)("Короткий ответ") },
+                { type: "textarea", label: (t as any)("Длинный ответ") },
+                { type: "number", label: (t as any)("Числовой ответ") },
+                { type: "checkbox", label: (t as any)("Множественный выбор") },
+                { type: "radio", label: (t as any)("Один вариант") },
+              ].map(({ type, label }) => (
+                <button
+                  key={type}
+                  onClick={() => handleAddQuestion(type as Question["type"])}
+                  className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  {(t as any)(label)}
+                </button>
+              ))}
             </div>
 
             <div className="space-y-2 mt-4">

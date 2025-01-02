@@ -34,6 +34,7 @@ const CreateForm = (props: Props) => {
         showModal={showModal}
         templateData={templateData}
         onClose={handleCloseModal}
+        setTemplateData={setTemplateData}
       />
     </div>
   );

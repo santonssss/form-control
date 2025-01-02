@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Dispatch, SetStateAction } from "react";
 import { saveTemplateToSupabase } from "../func/uploadFunc";
 import { useTranslation } from "react-i18next";
 import LoadingSpinner from "./LoadingSpinner";
@@ -27,12 +27,14 @@ type Props = {
     questions: Question[];
   };
   onClose: () => void;
+  setTemplateData: Dispatch<SetStateAction<any>>;
 };
 
 const TemplatePreviewModal: React.FC<Props> = ({
   showModal,
   templateData,
   onClose,
+  setTemplateData,
 }) => {
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -52,6 +54,7 @@ const TemplatePreviewModal: React.FC<Props> = ({
     setIsSubmitting(true);
     try {
       await saveTemplateToSupabase(templateData, author, email, t);
+      setTemplateData([]);
       onClose();
     } catch (error) {
       console.error("Error saving template:", error);
@@ -62,9 +65,17 @@ const TemplatePreviewModal: React.FC<Props> = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg w-3/4 md:w-1/2 p-6 shadow-xl">
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-          {(t as any)("Your template now looks like this")}:
-        </h2>
+        <div className="flex items-center justify-between ">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+            {(t as any)("Your template now looks like this")}:
+          </h2>
+          <span
+            className="text-lg text-blue-500 cursor-pointer"
+            onClick={onClose}
+          >
+            X
+          </span>
+        </div>
 
         <div className="mb-4">
           <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
